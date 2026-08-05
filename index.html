@@ -35,11 +35,10 @@
             overflow: hidden;
         }
 
-        /* Điều chỉnh tỉ lệ hàng: Hàng 1 cố định 220px cho ô 3 ngắn lại, Hàng 2 (1fr) mở rộng ô 4 */
         .dashboard {
             display: grid;
             grid-template-columns: 400px 1fr;
-            grid-template-rows: 220px 1fr;
+            grid-template-rows: auto 1fr;
             gap: 12px;
             height: calc(100vh - 24px);
         }
@@ -52,7 +51,6 @@
             display: flex;
             flex-direction: column;
             position: relative;
-            overflow: hidden;
         }
 
         .card-header {
@@ -202,9 +200,6 @@
             font-weight: 600; 
             padding: 10px; 
             border-bottom: 1px solid #374151; 
-            position: sticky;
-            top: 0;
-            z-index: 10;
         }
         td { padding: 9px 10px; border-bottom: 1px solid #1f2937; color: #d1d5db; }
         
@@ -224,8 +219,8 @@
 
 <div class="dashboard">
 
-    <!-- KHUNG 1: NHẬP DỮ LIỆU (Tự co giãn chiều cao theo nội dung) -->
-    <div class="card" style="grid-row: span 2;">
+    <!-- KHUNG 1: NHẬP DỮ LIỆU -->
+    <div class="card">
         <div class="card-header">1. NHẬP DỮ LIỆU ( Nhập issue MTI)</div>
 
         <div class="form-row-2">
@@ -287,17 +282,9 @@
             <button class="btn-action btn-query" onclick="addToQueue()">QUERY / ENTER</button>
             <button class="btn-action btn-done" id="btnSave" onclick="saveToSheet()">DONE / LƯU SHEET</button>
         </div>
-
-        <!-- THÔNG TIN SKU VỪA BẮN (Lồng trong Khung 1 bên dưới) -->
-        <div style="margin-top: 15px; flex: 1; display: flex; flex-direction: column;">
-            <div class="card-header" style="font-size: 12px;">2. THÔNG TIN SKU VỪA BẮN</div>
-            <div class="placeholder-box" id="recentSkuBox">
-                Chưa có thông tin SKU
-            </div>
-        </div>
     </div>
 
-    <!-- KHUNG 3: INVENTORY DETAILS (Chiều cao thu gọn 220px) -->
+    <!-- KHUNG 3: INVENTORY DETAILS -->
     <div class="card">
         <div class="card-header">
             <span>3. INVENTORY DETAILS</span>
@@ -311,7 +298,15 @@
         </div>
     </div>
 
-    <!-- KHUNG 4: QUEUE - DANH SÁCH ĐÃ BẮN (Mở rộng toàn bộ chiều cao còn lại) -->
+    <!-- KHUNG 2: THÔNG TIN SKU VỪA BẮN -->
+    <div class="card">
+        <div class="card-header">2. THÔNG TIN SKU VỪA BẮN</div>
+        <div class="placeholder-box" id="recentSkuBox">
+            Chưa có thông tin SKU
+        </div>
+    </div>
+
+    <!-- KHUNG 4: QUEUE - DANH SÁCH ĐÃ BẮN -->
     <div class="card">
         <div class="card-header">
             <span>4. QUEUE - DANH SÁCH ĐÃ BẮN</span>
@@ -345,11 +340,18 @@
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzZPLbe3ppolRVCPeaB7la1hZmPiXdevnn3dP6AHBRMj0-MYxmvny6Sd6kdXYN9a4x0/exec";
+    // URL Web App Apps Script
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx6Y-skp23Wt4UPnqJhACEgA3qbYfl3_3lYjSlD9UVHV_nGfzcBaBbfxfAb22_83aAh/exec";
 
     let queue = [];
 
-    document.getElementById("inboundDate").valueAsDate = new Date();
+    // Tự động gán ngày D (Ngày hiện tại) theo múi giờ địa phương
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    document.getElementById("inboundDate").value = `${year}-${month}-${day}`;
+
     document.getElementById("inputMtb").focus();
 
     document.querySelectorAll('input[name="condition"]').forEach(radio => {
