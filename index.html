@@ -1,527 +1,273 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Quản Lý Kho - Issue MTI</title>
-    <style>
-        :root {
-            --bg-main: #0b1120;
-            --bg-card: #111827;
-            --bg-input: #1f2937;
-            --border-color: #374151;
-            --text-cyan: #00f2fe;
-            --text-gray: #9ca3af;
-            --text-white: #ffffff;
-            --btn-green: #10b981;
-            --btn-green-hover: #059669;
-            --btn-danger: #ef4444;
-            --btn-danger-hover: #dc2626;
-        }
+// URL Web App Apps Script mới
+const SCRIPT_URL =
+"https://script.google.com/macros/s/AKfycbyt5kBnWn_y9gqnVQF-Z9GJwIq37ZHIuFGSV3TQ1LrdHyrnxFesVFVEYdPks8Zyav2_/exec";
 
-        * { 
-            box-sizing: border-box; 
-            margin: 0; 
-            padding: 0; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-        }
+let queue = [];
 
-        body { 
-            background-color: var(--bg-main); 
-            color: var(--text-white); 
-            padding: 12px; 
-            height: 100vh; 
-            font-size: 13px; 
-            overflow: hidden;
-        }
+// Tự động gán ngày hiện tại
+const today = new Date();
+const year = today.getFullYear();
+const month = String(today.getMonth() + 1).padStart(2, "0");
+const day = String(today.getDate()).padStart(2, "0");
 
-        .dashboard {
-            display: grid;
-            grid-template-columns: 400px 1fr;
-            grid-template-rows: auto 1fr;
-            gap: 12px;
-            height: calc(100vh - 24px);
-        }
+document.getElementById("inboundDate").value =
+    `${year}-${month}-${day}`;
 
-        .card {
-            background-color: var(--bg-card);
-            border: 1px solid #1f2937;
-            border-radius: 8px;
-            padding: 14px;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
+document.getElementById("inputMtb").focus();
 
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-cyan);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
 
-        .card-header .header-right {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--text-gray);
-            font-size: 11px;
-        }
-
-        .btn-reload {
-            background: #1f2937;
-            color: var(--text-white);
-            border: 1px solid #374151;
-            padding: 4px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            transition: 0.2s;
-        }
-        .btn-reload:hover { background: #374151; }
-
-        .form-row-2 { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 10px; 
-            margin-bottom: 10px; 
-        }
-        
-        .form-row-3 { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr 70px; 
-            gap: 10px; 
-            margin-bottom: 10px; 
-        }
-
-        .form-group { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 5px; 
-            width: 100%;
-        }
-        
-        label { 
-            font-size: 11px; 
-            color: var(--text-gray); 
-            font-weight: 600; 
-            text-transform: uppercase; 
-        }
-
-        input[type="text"], 
-        input[type="date"], 
-        input[type="number"], 
-        select {
-            width: 100%;
-            height: 38px;
-            background: var(--bg-input);
-            border: 1px solid var(--border-color);
-            color: var(--text-white);
-            padding: 0 10px;
-            border-radius: 5px;
-            outline: none;
-            font-size: 12px;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        input:focus, select:focus { 
-            border-color: var(--text-cyan); 
-            box-shadow: 0 0 5px rgba(0, 242, 254, 0.3);
-        }
-
-        .radio-group {
-            display: flex;
-            height: 38px;
-            background: var(--bg-input);
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-            padding: 0 10px;
-            gap: 15px;
-            align-items: center;
-            justify-content: space-around;
-        }
-        .radio-item { 
-            display: flex; 
-            align-items: center; 
-            gap: 6px; 
-            cursor: pointer; 
-            font-size: 11px; 
-            font-weight: bold; 
-        }
-        .radio-item.good { color: #38bdf8; }
-        .radio-item.damage { color: #f87171; }
-        .radio-item.wrong { color: #fbbf24; }
-
-        .btn-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 10px; 
-            margin-top: 4px; 
-        }
-        .btn-action {
-            height: 38px;
-            border: none;
-            border-radius: 5px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 12px;
-            text-transform: uppercase;
-            transition: opacity 0.2s;
-        }
-        .btn-action:hover { opacity: 0.9; }
-        .btn-query { background: #00d2ff; color: #000; }
-        .btn-done { background: var(--btn-green); color: #fff; }
-
-        .placeholder-box {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-gray);
-            font-size: 12px;
-            border: 1px dashed #1f2937;
-            border-radius: 5px;
-        }
-
-        .table-container { flex: 1; overflow-y: auto; }
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
-        th { 
-            background: #1f2937; 
-            color: var(--text-gray); 
-            font-size: 11px; 
-            font-weight: 600; 
-            padding: 10px; 
-            border-bottom: 1px solid #374151; 
-        }
-        td { padding: 9px 10px; border-bottom: 1px solid #1f2937; color: #d1d5db; }
-        
-        .btn-delete { 
-            background: var(--btn-danger); 
-            color: white; 
-            border: none; 
-            padding: 4px 8px; 
-            border-radius: 3px; 
-            cursor: pointer; 
-            font-size: 11px; 
-        }
-        .btn-delete:hover { background: var(--btn-danger-hover); }
-    </style>
-</head>
-<body>
-
-<div class="dashboard">
-
-    <!-- KHUNG 1: NHẬP DỮ LIỆU -->
-    <div class="card">
-        <div class="card-header">1. NHẬP DỮ LIỆU ( Nhập issue MTI)</div>
-
-        <div class="form-row-2">
-            <div class="form-group">
-                <label>INBOUND DATE</label>
-                <input type="date" id="inboundDate">
-            </div>
-            <div class="form-group">
-                <label>WAREHOUSE</label>
-                <select id="warehouse">
-                    <option value="VNA">VNA</option>
-                    <option value="VNNL">VNNL</option>
-                    <option value="VNVL">VNVL</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="form-row-2">
-            <div class="form-group">
-                <label>STAFF</label>
-                <input type="text" id="staff" placeholder="Nhập tên">
-            </div>
-            <div class="form-group">
-                <label>SHIPPING ID</label>
-                <input type="text" id="shippingId" placeholder="Nhập Shipping ID">
-            </div>
-        </div>
-
-        <div class="form-row-3">
-            <div class="form-group">
-                <label>MTB</label>
-                <input type="text" id="inputMtb" placeholder="Bắn/Nhập MTB">
-            </div>
-            <div class="form-group">
-                <label>INPUT SKU ID</label>
-                <input type="text" id="inputSku" placeholder="Bắn/Nhập SKU">
-            </div>
-            <div class="form-group">
-                <label>QTY</label>
-                <input type="number" id="inputQty" value="1" min="1" style="text-align: center;">
-            </div>
-        </div>
-
-        <div class="form-group" style="margin-bottom: 10px;">
-            <label>CONDITION</label>
-            <div class="radio-group">
-                <label class="radio-item good"><input type="radio" name="condition" value="GOOD" checked> GOOD</label>
-                <label class="radio-item damage"><input type="radio" name="condition" value="DAMAGE"> DAMAGE</label>
-                <label class="radio-item wrong"><input type="radio" name="condition" value="SAI HÀNG"> SAI HÀNG</label>
-            </div>
-        </div>
-
-        <div class="form-group" id="correctSkuBox" style="display: none; margin-bottom: 10px;">
-            <label style="color: #fbbf24;">SKU ĐÚNG</label>
-            <input type="text" id="correctSku" placeholder="Nhập SKU đúng">
-        </div>
-
-        <div class="btn-grid">
-            <button class="btn-action btn-query" onclick="addToQueue()">QUERY / ENTER</button>
-            <button class="btn-action btn-done" id="btnSave" onclick="saveToSheet()">DONE / LƯU SHEET</button>
-        </div>
-    </div>
-
-    <!-- KHUNG 3: INVENTORY DETAILS -->
-    <div class="card">
-        <div class="card-header">
-            <span>3. INVENTORY DETAILS</span>
-            <div class="header-right">
-                <span id="locCount">0 LOCATIONS</span>
-                <button class="btn-reload" onclick="resetInventory()">↻ TẢI LẠI</button>
-            </div>
-        </div>
-        <div class="placeholder-box" id="inventoryBox">
-            Scan SKU và nhấn ENTER để tra cứu
-        </div>
-    </div>
-
-    <!-- KHUNG 2: THÔNG TIN SKU VỪA BẮN -->
-    <div class="card">
-        <div class="card-header">2. THÔNG TIN SKU VỪA BẮN</div>
-        <div class="placeholder-box" id="recentSkuBox">
-            Chưa có thông tin SKU
-        </div>
-    </div>
-
-    <!-- KHUNG 4: QUEUE - DANH SÁCH ĐÃ BẮN -->
-    <div class="card">
-        <div class="card-header">
-            <span>4. QUEUE - DANH SÁCH ĐÃ BẮN</span>
-            <div class="header-right">
-                <span id="queueCount">0 SKU</span>
-                <button class="btn-reload" style="background: #ef4444; border-color: #dc2626;" onclick="clearAllQueue()">✕ XÓA TẤT CẢ</button>
-            </div>
-        </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>MTB</th>
-                        <th>SKU ID</th>
-                        <th>Condition</th>
-                        <th>Warehouse / Staff / Shipping ID</th>
-                        <th>SKU Đúng</th>
-                        <th>Qty</th>
-                        <th style="width: 50px; text-align: center;">Xóa</th>
-                    </tr>
-                </thead>
-                <tbody id="queueTableBody">
-                    <tr>
-                        <td colspan="7" style="text-align: center; color: var(--text-gray); padding: 30px;">Chưa có SKU trong queue</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-</div>
-
-<script>
-    // URL Web App Apps Script
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx6Y-skp23Wt4UPnqJhACEgA3qbYfl3_3lYjSlD9UVHV_nGfzcBaBbfxfAb22_83aAh/exec";
-
-    let queue = [];
-
-    // Tự động gán ngày D (Ngày hiện tại) theo múi giờ địa phương
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    document.getElementById("inboundDate").value = `${year}-${month}-${day}`;
-
-    document.getElementById("inputMtb").focus();
-
-    document.querySelectorAll('input[name="condition"]').forEach(radio => {
-        radio.addEventListener('change', function() {
-            document.getElementById("correctSkuBox").style.display = (this.value === "SAI HÀNG") ? "block" : "none";
-        });
+// Hiển thị ô SKU đúng khi chọn SAI HÀNG
+document.querySelectorAll('input[name="condition"]').forEach(radio => {
+    radio.addEventListener("change", function () {
+        document.getElementById("correctSkuBox").style.display =
+            this.value === "SAI HÀNG" ? "block" : "none";
     });
+});
 
-    document.getElementById("inputMtb").addEventListener("keypress", function(e) {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            document.getElementById("inputSku").focus();
-            document.getElementById("inputSku").select();
-        }
-    });
 
-    document.getElementById("inputSku").addEventListener("keypress", function(e) {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            document.getElementById("inputQty").focus();
-            document.getElementById("inputQty").select();
-        }
-    });
+// Enter tại MTB chuyển sang SKU
+document.getElementById("inputMtb").addEventListener("keypress", function (e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        document.getElementById("inputSku").focus();
+        document.getElementById("inputSku").select();
+    }
+});
 
-    document.getElementById("inputQty").addEventListener("keypress", function(e) {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            const condition = document.querySelector('input[name="condition"]:checked').value;
-            if (condition === "SAI HÀNG") {
-                document.getElementById("correctSku").focus();
-                document.getElementById("correctSku").select();
-            } else {
-                addToQueue();
-            }
-        }
-    });
 
-    document.getElementById("correctSku").addEventListener("keypress", function(e) {
-        if (e.key === "Enter") {
-            e.preventDefault();
+// Enter tại SKU chuyển sang QTY
+document.getElementById("inputSku").addEventListener("keypress", function (e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        document.getElementById("inputQty").focus();
+        document.getElementById("inputQty").select();
+    }
+});
+
+
+// Enter tại QTY
+document.getElementById("inputQty").addEventListener("keypress", function (e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+
+        const condition =
+            document.querySelector('input[name="condition"]:checked').value;
+
+        if (condition === "SAI HÀNG") {
+            document.getElementById("correctSku").focus();
+            document.getElementById("correctSku").select();
+        } else {
             addToQueue();
         }
-    });
+    }
+});
 
-    function addToQueue() {
-        const mtb = document.getElementById("inputMtb").value.trim();
-        const sku = document.getElementById("inputSku").value.trim();
-        const qty = parseInt(document.getElementById("inputQty").value) || 0;
-        const staff = document.getElementById("staff").value.trim();
-        const shippingId = document.getElementById("shippingId").value.trim();
-        const condition = document.querySelector('input[name="condition"]:checked').value;
-        const correctSku = document.getElementById("correctSku").value.trim();
 
-        if (!sku) { alert("Vui lòng nhập hoặc bắn SKU!"); document.getElementById("inputSku").focus(); return; }
-        if (qty <= 0) { alert("Số lượng phải lớn hơn 0!"); return; }
-        if (condition === "SAI HÀNG" && !correctSku) { alert("Vui lòng nhập SKU đúng!"); document.getElementById("correctSku").focus(); return; }
+// Enter tại SKU đúng
+document.getElementById("correctSku").addEventListener("keypress", function (e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        addToQueue();
+    }
+});
 
-        const item = {
-            date: document.getElementById("inboundDate").value,
-            warehouse: document.getElementById("warehouse").value,
-            shippingId: shippingId || "N/A",
-            mtb: mtb,
-            sku: sku,
-            skuName: "",
-            qty: qty,
-            note: condition,
-            pallet: "",
-            staff: staff || "N/A",
-            time: new Date().toLocaleTimeString("vi-VN"),
-            correctSku: condition === "SAI HÀNG" ? correctSku : ""
-        };
 
-        queue.push(item);
-        
-        document.getElementById("recentSkuBox").innerHTML = `
-            <div style="text-align: left; width: 100%; padding: 10px; font-size: 13px;">
-                <p><b>MTB:</b> <span style="color:#fbbf24">${item.mtb || '-'}</span></p>
-                <p><b>SKU:</b> <span style="color:#00f2fe">${item.sku}</span></p>
-                <p><b>QTY:</b> ${item.qty}</p>
-                <p><b>Condition:</b> ${item.note}</p>
-                <p><b>Staff/Shipping:</b> ${item.staff} / ${item.shippingId}</p>
-            </div>
-        `;
+// Thêm dữ liệu vào queue
+function addToQueue() {
+    const mtb = document.getElementById("inputMtb").value.trim();
+    const sku = document.getElementById("inputSku").value.trim();
+    const qty = parseInt(document.getElementById("inputQty").value, 10) || 0;
+    const staff = document.getElementById("staff").value.trim();
+    const shippingId = document.getElementById("shippingId").value.trim();
+    const condition =
+        document.querySelector('input[name="condition"]:checked').value;
+    const correctSku = document.getElementById("correctSku").value.trim();
 
-        renderQueue();
-
-        document.getElementById("inputMtb").value = "";
-        document.getElementById("inputSku").value = "";
-        document.getElementById("inputQty").value = 1;
-        document.getElementById("correctSku").value = "";
-        document.getElementById("inputMtb").focus();
+    if (!sku) {
+        alert("Vui lòng nhập hoặc bắn SKU!");
+        document.getElementById("inputSku").focus();
+        return;
     }
 
-    function removeItem(index) {
-        queue.splice(index, 1);
-        renderQueue();
+    if (qty <= 0) {
+        alert("Số lượng phải lớn hơn 0!");
+        document.getElementById("inputQty").focus();
+        return;
     }
 
-    function clearAllQueue() {
-        if (queue.length === 0) return;
-        if (confirm("Xóa tất cả mảng tạm?")) {
-            queue = [];
-            renderQueue();
-            document.getElementById("recentSkuBox").innerHTML = "Chưa có thông tin SKU";
-            document.getElementById("inputMtb").focus();
-        }
+    if (condition === "SAI HÀNG" && !correctSku) {
+        alert("Vui lòng nhập SKU đúng!");
+        document.getElementById("correctSku").focus();
+        return;
     }
 
-    function renderQueue() {
-        const tbody = document.getElementById("queueTableBody");
-        document.getElementById("queueCount").textContent = queue.length + " SKU";
+    const item = {
+        date: document.getElementById("inboundDate").value,
+        warehouse: document.getElementById("warehouse").value,
+        shippingId: shippingId || "N/A",
+        mtb: mtb,
+        sku: sku,
+        skuName: "",
+        qty: qty,
+        note: condition,
+        pallet: "",
+        staff: staff || "N/A",
+        time: new Date().toLocaleTimeString("vi-VN"),
+        correctSku: condition === "SAI HÀNG" ? correctSku : ""
+    };
 
-        if (queue.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-gray); padding: 30px;">Chưa có SKU trong queue</td></tr>`;
-            return;
-        }
+    queue.push(item);
 
-        tbody.innerHTML = queue.map((item, index) => `
+    document.getElementById("recentSkuBox").innerHTML = `
+        <div style="text-align:left;width:100%;padding:10px;font-size:13px;">
+            <p><b>MTB:</b>
+                <span style="color:#fbbf24">${escapeHtml(item.mtb || "-")}</span>
+            </p>
+            <p><b>SKU:</b>
+                <span style="color:#00f2fe">${escapeHtml(item.sku)}</span>
+            </p>
+            <p><b>QTY:</b> ${item.qty}</p>
+            <p><b>Condition:</b> ${escapeHtml(item.note)}</p>
+            <p><b>Staff/Shipping:</b>
+                ${escapeHtml(item.staff)} / ${escapeHtml(item.shippingId)}
+            </p>
+        </div>
+    `;
+
+    renderQueue();
+
+    document.getElementById("inputMtb").value = "";
+    document.getElementById("inputSku").value = "";
+    document.getElementById("inputQty").value = 1;
+    document.getElementById("correctSku").value = "";
+
+    document.getElementById("inputMtb").focus();
+}
+
+
+// Hiển thị queue
+function renderQueue() {
+    const tbody = document.getElementById("queueTableBody");
+    const queueCount = document.getElementById("queueCount");
+
+    queueCount.textContent = queue.length + " SKU";
+
+    if (queue.length === 0) {
+        tbody.innerHTML = `
             <tr>
-                <td style="color:#fbbf24; font-weight:bold;">${item.mtb || '-'}</td>
-                <td style="color:#00f2fe; font-weight:bold;">${item.sku}</td>
-                <td>${item.note}</td>
-                <td>${item.warehouse} / ${item.staff} / ${item.shippingId}</td>
-                <td>${item.correctSku || '-'}</td>
-                <td>${item.qty}</td>
-                <td style="text-align: center;">
-                    <button class="btn-delete" onclick="removeItem(${index})">Xóa</button>
+                <td colspan="7"
+                    style="text-align:center;color:var(--text-gray);padding:30px;">
+                    Chưa có SKU trong queue
                 </td>
             </tr>
-        `).join('');
+        `;
+        return;
     }
 
-    function resetInventory() {
-        document.getElementById("inventoryBox").innerHTML = "Scan SKU và nhấn ENTER để tra cứu";
-        document.getElementById("locCount").textContent = "0 LOCATIONS";
+    tbody.innerHTML = queue.map((item, index) => `
+        <tr>
+            <td>${escapeHtml(item.mtb || "-")}</td>
+            <td>${escapeHtml(item.sku)}</td>
+            <td>${escapeHtml(item.note)}</td>
+            <td>
+                ${escapeHtml(item.warehouse)}
+                /
+                ${escapeHtml(item.staff)}
+                /
+                ${escapeHtml(item.shippingId)}
+            </td>
+            <td>${escapeHtml(item.correctSku || "-")}</td>
+            <td>${item.qty}</td>
+            <td style="text-align:center;">
+                <button class="btn-delete" onclick="removeItem(${index})">
+                    Xóa
+                </button>
+            </td>
+        </tr>
+    `).join("");
+}
+
+
+// Xóa một dòng trong queue
+function removeItem(index) {
+    queue.splice(index, 1);
+    renderQueue();
+}
+
+
+// Xóa toàn bộ queue
+function clearAllQueue() {
+    if (queue.length === 0) {
+        return;
     }
 
-    function saveToSheet() {
-        if (queue.length === 0) {
-            alert("Chưa có danh sách SKU để lưu!");
-            return;
-        }
+    if (confirm("Xóa tất cả dữ liệu tạm?")) {
+        queue = [];
+        renderQueue();
 
-        const btnSave = document.getElementById("btnSave");
-        btnSave.disabled = true;
-        btnSave.textContent = "ĐANG LƯU...";
+        document.getElementById("recentSkuBox").innerHTML =
+            "Chưa có thông tin SKU";
 
-        fetch(SCRIPT_URL, {
+        document.getElementById("inputMtb").focus();
+    }
+}
+
+
+// Lưu queue về Google Sheet
+async function saveToSheet() {
+    if (queue.length === 0) {
+        alert("Queue đang trống!");
+        return;
+    }
+
+    const btn = document.getElementById("btnSave");
+    const oldText = btn.textContent;
+
+    btn.disabled = true;
+    btn.textContent = "ĐANG LƯU...";
+
+    try {
+        await fetch(SCRIPT_URL, {
             method: "POST",
-            body: JSON.stringify({ items: queue })
-        })
-        .then(res => res.json())
-        .then(res => {
-            if (res.status === "success") {
-                alert("Đã lưu dữ liệu thành công về Sheet Issue MTI!");
-                queue = [];
-                renderQueue();
-                document.getElementById("recentSkuBox").innerHTML = "Chưa có thông tin SKU";
-                document.getElementById("inputMtb").focus();
-            } else {
-                alert("Lỗi server: " + res.message);
-            }
-        })
-        .catch(err => alert("Lỗi gửi dữ liệu: " + err.message))
-        .finally(() => {
-            btnSave.disabled = false;
-            btnSave.textContent = "DONE / LƯU SHEET";
+            mode: "no-cors",
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8"
+            },
+            body: JSON.stringify({
+                items: queue
+            })
         });
-    }
-</script>
 
-</body>
-</html>
+        alert("Đã gửi " + queue.length + " SKU về Google Sheet.");
+
+        queue = [];
+        renderQueue();
+
+        document.getElementById("recentSkuBox").innerHTML =
+            "Chưa có thông tin SKU";
+
+        document.getElementById("inputMtb").focus();
+
+    } catch (error) {
+        console.error("Lỗi lưu dữ liệu:", error);
+        alert("Không thể gửi dữ liệu về Google Sheet.");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = oldText;
+    }
+}
+
+
+// Làm sạch nội dung trước khi hiển thị lên HTML
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+// Khởi tạo bảng queue
+renderQueue();
