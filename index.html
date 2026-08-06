@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Hệ Thống Quản Lý Kho - Issue MTI</title>
 
     <style>
@@ -15,18 +16,20 @@
             --text-gray: #9ca3af;
             --text-white: #ffffff;
             --btn-green: #10b981;
+            --btn-green-hover: #059669;
             --btn-danger: #ef4444;
+            --btn-danger-hover: #dc2626;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
         body {
-            background: var(--bg-main);
+            background-color: var(--bg-main);
             color: var(--text-white);
             padding: 12px;
             height: 100vh;
@@ -43,7 +46,7 @@
         }
 
         .card {
-            background: var(--bg-card);
+            background-color: var(--bg-card);
             border: 1px solid #1f2937;
             border-radius: 8px;
             padding: 14px;
@@ -60,8 +63,9 @@
             margin-bottom: 12px;
             color: var(--text-cyan);
             font-size: 13px;
-            font-weight: bold;
+            font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: .4px;
         }
 
         .header-right {
@@ -96,11 +100,13 @@
         label {
             font-size: 11px;
             color: var(--text-gray);
-            font-weight: bold;
+            font-weight: 600;
             text-transform: uppercase;
         }
 
-        input,
+        input[type="text"],
+        input[type="date"],
+        input[type="number"],
         select {
             width: 100%;
             height: 38px;
@@ -125,6 +131,8 @@
             background: var(--bg-input);
             border: 1px solid var(--border-color);
             border-radius: 5px;
+            padding: 0 10px;
+            gap: 15px;
             align-items: center;
             justify-content: space-around;
         }
@@ -132,15 +140,23 @@
         .radio-item {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
             cursor: pointer;
             font-size: 11px;
             font-weight: bold;
         }
 
-        .good { color: #38bdf8; }
-        .damage { color: #f87171; }
-        .wrong { color: #fbbf24; }
+        .radio-item.good {
+            color: #38bdf8;
+        }
+
+        .radio-item.damage {
+            color: #f87171;
+        }
+
+        .radio-item.wrong {
+            color: #fbbf24;
+        }
 
         .btn-grid {
             display: grid;
@@ -153,9 +169,20 @@
             height: 38px;
             border: none;
             border-radius: 5px;
-            font-weight: bold;
+            font-weight: 700;
             cursor: pointer;
             font-size: 12px;
+            text-transform: uppercase;
+            transition: opacity .2s;
+        }
+
+        .btn-action:hover {
+            opacity: .9;
+        }
+
+        .btn-action:disabled {
+            opacity: .6;
+            cursor: wait;
         }
 
         .btn-query {
@@ -168,11 +195,6 @@
             color: #fff;
         }
 
-        .btn-action:disabled {
-            opacity: .6;
-            cursor: wait;
-        }
-
         .btn-reload {
             background: #1f2937;
             color: #fff;
@@ -181,6 +203,10 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 11px;
+        }
+
+        .btn-reload:hover {
+            background: #374151;
         }
 
         .placeholder-box {
@@ -210,10 +236,12 @@
             background: #1f2937;
             color: var(--text-gray);
             font-size: 11px;
+            font-weight: 600;
             padding: 10px;
             border-bottom: 1px solid #374151;
             position: sticky;
             top: 0;
+            z-index: 2;
         }
 
         td {
@@ -232,10 +260,14 @@
             font-size: 11px;
         }
 
+        .btn-delete:hover {
+            background: var(--btn-danger-hover);
+        }
+
         @media (max-width: 900px) {
             body {
-                overflow: auto;
                 height: auto;
+                overflow: auto;
             }
 
             .dashboard {
@@ -252,467 +284,512 @@
 </head>
 
 <body>
-    <div class="dashboard">
 
-        <!-- KHUNG 1 -->
-        <div class="card">
-            <div class="card-header">
-                1. NHẬP DỮ LIỆU - ISSUE MTI
+<div class="dashboard">
+
+    <!-- KHUNG 1: NHẬP DỮ LIỆU -->
+    <div class="card">
+        <div class="card-header">
+            1. NHẬP DỮ LIỆU - ISSUE MTI
+        </div>
+
+        <div class="form-row-2">
+            <div class="form-group">
+                <label>Inbound Date</label>
+                <input type="date" id="inboundDate">
             </div>
 
-            <div class="form-row-2">
-                <div class="form-group">
-                    <label>Inbound Date</label>
-                    <input type="date" id="inboundDate">
-                </div>
-
-                <div class="form-group">
-                    <label>Warehouse</label>
-                    <select id="warehouse">
-                        <option value="VNA">VNA</option>
-                        <option value="VNNL">VNNL</option>
-                        <option value="VNVL">VNVL</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-row-2">
-                <div class="form-group">
-                    <label>Staff</label>
-                    <input type="text" id="staff" placeholder="Nhập tên">
-                </div>
-
-                <div class="form-group">
-                    <label>Shipping ID</label>
-                    <input type="text" id="shippingId" placeholder="Nhập Shipping ID">
-                </div>
-            </div>
-
-            <div class="form-row-3">
-                <div class="form-group">
-                    <label>MTB</label>
-                    <input type="text" id="inputMtb" placeholder="Bắn/Nhập MTB">
-                </div>
-
-                <div class="form-group">
-                    <label>Input SKU ID</label>
-                    <input type="text" id="inputSku" placeholder="Bắn/Nhập SKU">
-                </div>
-
-                <div class="form-group">
-                    <label>Qty</label>
-                    <input type="number" id="inputQty" value="1" min="1">
-                </div>
-            </div>
-
-            <div class="form-group" style="margin-bottom:10px;">
-                <label>Condition</label>
-
-                <div class="radio-group">
-                    <label class="radio-item good">
-                        <input type="radio" name="condition" value="GOOD" checked>
-                        GOOD
-                    </label>
-
-                    <label class="radio-item damage">
-                        <input type="radio" name="condition" value="DAMAGE">
-                        DAMAGE
-                    </label>
-
-                    <label class="radio-item wrong">
-                        <input type="radio" name="condition" value="SAI HÀNG">
-                        SAI HÀNG
-                    </label>
-                </div>
-            </div>
-
-            <div class="form-group" id="correctSkuBox"
-                 style="display:none;margin-bottom:10px;">
-                <label style="color:#fbbf24;">SKU ĐÚNG</label>
-                <input type="text" id="correctSku" placeholder="Nhập SKU đúng">
-            </div>
-
-            <div class="btn-grid">
-                <button class="btn-action btn-query" id="btnAdd">
-                    QUERY / ENTER
-                </button>
-
-                <button class="btn-action btn-done" id="btnSave">
-                    DONE / LƯU SHEET
-                </button>
+            <div class="form-group">
+                <label>Warehouse</label>
+                <select id="warehouse">
+                    <option value="VNA">VNA</option>
+                    <option value="VNNL">VNNL</option>
+                    <option value="VNVL">VNVL</option>
+                </select>
             </div>
         </div>
 
-
-        <!-- KHUNG 3 -->
-        <div class="card">
-            <div class="card-header">
-                <span>3. INVENTORY DETAILS</span>
-
-                <div class="header-right">
-                    <span id="locCount">0 LOCATIONS</span>
-                    <button class="btn-reload" id="btnResetInventory">
-                        ↻ TẢI LẠI
-                    </button>
-                </div>
+        <div class="form-row-2">
+            <div class="form-group">
+                <label>Staff</label>
+                <input type="text" id="staff" placeholder="Nhập tên">
             </div>
 
-            <div class="placeholder-box" id="inventoryBox">
-                Scan SKU và nhấn ENTER để tra cứu
+            <div class="form-group">
+                <label>Shipping ID</label>
+                <input type="text" id="shippingId" placeholder="Nhập Shipping ID">
             </div>
         </div>
 
-
-        <!-- KHUNG 2 -->
-        <div class="card">
-            <div class="card-header">
-                2. THÔNG TIN SKU VỪA BẮN
+        <div class="form-row-3">
+            <div class="form-group">
+                <label>MTB</label>
+                <input type="text" id="inputMtb" placeholder="Bắn/Nhập MTB">
             </div>
 
-            <div class="placeholder-box" id="recentSkuBox">
-                Chưa có thông tin SKU
-            </div>
-        </div>
-
-
-        <!-- KHUNG 4 -->
-        <div class="card">
-            <div class="card-header">
-                <span>4. QUEUE - DANH SÁCH ĐÃ BẮN</span>
-
-                <div class="header-right">
-                    <span id="queueCount">0 SKU</span>
-
-                    <button class="btn-reload"
-                            style="background:#ef4444;border-color:#dc2626;"
-                            id="btnClear">
-                        ✕ XÓA TẤT CẢ
-                    </button>
-                </div>
+            <div class="form-group">
+                <label>Input SKU ID</label>
+                <input type="text" id="inputSku" placeholder="Bắn/Nhập SKU">
             </div>
 
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>MTB</th>
-                            <th>SKU ID</th>
-                            <th>Condition</th>
-                            <th>Warehouse / Staff / Shipping ID</th>
-                            <th>SKU Đúng</th>
-                            <th>Qty</th>
-                            <th>Xóa</th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="queueTableBody">
-                        <tr>
-                            <td colspan="7"
-                                style="text-align:center;color:#9ca3af;padding:30px;">
-                                Chưa có SKU trong queue
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="form-group">
+                <label>Qty</label>
+                <input type="number" id="inputQty" value="1" min="1">
             </div>
         </div>
 
+        <div class="form-group" style="margin-bottom:10px;">
+            <label>Condition</label>
+
+            <div class="radio-group">
+                <label class="radio-item good">
+                    <input type="radio" name="condition" value="GOOD" checked>
+                    GOOD
+                </label>
+
+                <label class="radio-item damage">
+                    <input type="radio" name="condition" value="DAMAGE">
+                    DAMAGE
+                </label>
+
+                <label class="radio-item wrong">
+                    <input type="radio" name="condition" value="SAI HÀNG">
+                    SAI HÀNG
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group" id="correctSkuBox"
+             style="display:none;margin-bottom:10px;">
+            <label style="color:#fbbf24;">SKU ĐÚNG</label>
+            <input type="text" id="correctSku" placeholder="Nhập SKU đúng">
+        </div>
+
+        <div class="btn-grid">
+            <button class="btn-action btn-query" id="btnAdd">
+                QUERY / ENTER
+            </button>
+
+            <button class="btn-action btn-done" id="btnSave">
+                DONE / LƯU SHEET
+            </button>
+        </div>
     </div>
 
 
-    <!-- JAVASCRIPT PHẢI NẰM TRONG THẺ SCRIPT -->
-    <script>
-        const SCRIPT_URL =
-        "https://script.google.com/macros/s/AKfycbxWeuVGXIYFgSsgBZAMlFJQlzmDmNiD3bmT-_awTqghDio5eCWgOU-vD2YYI-WSIV_a/exec";
+    <!-- KHUNG 3: INVENTORY DETAILS -->
+    <div class="card">
+        <div class="card-header">
+            <span>3. INVENTORY DETAILS</span>
 
-        let queue = [];
+            <div class="header-right">
+                <span id="locCount">0 LOCATIONS</span>
 
-        const inboundDate = document.getElementById("inboundDate");
-        const inputMtb = document.getElementById("inputMtb");
-        const inputSku = document.getElementById("inputSku");
-        const inputQty = document.getElementById("inputQty");
-        const correctSku = document.getElementById("correctSku");
+                <button class="btn-reload" id="btnResetInventory">
+                    ↻ TẢI LẠI
+                </button>
+            </div>
+        </div>
 
-        // Gán ngày hiện tại
-        const now = new Date();
-
-        inboundDate.value =
-            now.getFullYear() + "-" +
-            String(now.getMonth() + 1).padStart(2, "0") + "-" +
-            String(now.getDate()).padStart(2, "0");
-
-        inputMtb.focus();
+        <div class="placeholder-box" id="inventoryBox">
+            Scan SKU và nhấn ENTER để tra cứu
+        </div>
+    </div>
 
 
-        // Hiển thị hoặc ẩn ô SKU đúng
-        document.querySelectorAll('input[name="condition"]')
-            .forEach(function(radio) {
-                radio.addEventListener("change", function() {
-                    document.getElementById("correctSkuBox").style.display =
-                        this.value === "SAI HÀNG" ? "block" : "none";
-                });
-            });
+    <!-- KHUNG 2: SKU VỪA BẮN -->
+    <div class="card">
+        <div class="card-header">
+            2. THÔNG TIN SKU VỪA BẮN
+        </div>
+
+        <div class="placeholder-box" id="recentSkuBox">
+            Chưa có thông tin SKU
+        </div>
+    </div>
 
 
-        // Enter tại MTB
-        inputMtb.addEventListener("keydown", function(e) {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                inputSku.focus();
-                inputSku.select();
-            }
-        });
+    <!-- KHUNG 4: QUEUE -->
+    <div class="card">
+        <div class="card-header">
+            <span>4. QUEUE - DANH SÁCH ĐÃ BẮN</span>
 
+            <div class="header-right">
+                <span id="queueCount">0 SKU</span>
 
-        // Enter tại SKU
-        inputSku.addEventListener("keydown", function(e) {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                inputQty.focus();
-                inputQty.select();
-            }
-        });
+                <button class="btn-reload"
+                        id="btnClear"
+                        style="background:#ef4444;border-color:#dc2626;">
+                    ✕ XÓA TẤT CẢ
+                </button>
+            </div>
+        </div>
 
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>MTB</th>
+                        <th>SKU ID</th>
+                        <th>Condition</th>
+                        <th>Warehouse / Staff / Shipping ID</th>
+                        <th>SKU Đúng</th>
+                        <th>Qty</th>
+                        <th style="width:50px;text-align:center;">Xóa</th>
+                    </tr>
+                </thead>
 
-        // Enter tại QTY
-        inputQty.addEventListener("keydown", function(e) {
-            if (e.key === "Enter") {
-                e.preventDefault();
-
-                const condition = document.querySelector(
-                    'input[name="condition"]:checked'
-                ).value;
-
-                if (condition === "SAI HÀNG") {
-                    correctSku.focus();
-                    correctSku.select();
-                } else {
-                    addToQueue();
-                }
-            }
-        });
-
-
-        // Enter tại SKU đúng
-        correctSku.addEventListener("keydown", function(e) {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                addToQueue();
-            }
-        });
-
-
-        // Nút QUERY / ENTER
-        document.getElementById("btnAdd")
-            .addEventListener("click", addToQueue);
-
-
-        // Thêm SKU vào queue
-        function addToQueue() {
-            const mtb = inputMtb.value.trim();
-            const sku = inputSku.value.trim();
-            const qty = parseInt(inputQty.value, 10) || 0;
-            const staff = document.getElementById("staff").value.trim();
-            const shippingId =
-                document.getElementById("shippingId").value.trim();
-
-            const condition = document.querySelector(
-                'input[name="condition"]:checked'
-            ).value;
-
-            const correctSkuValue = correctSku.value.trim();
-
-            if (!sku) {
-                alert("Vui lòng nhập hoặc bắn SKU!");
-                inputSku.focus();
-                return;
-            }
-
-            if (qty <= 0) {
-                alert("Số lượng phải lớn hơn 0!");
-                inputQty.focus();
-                return;
-            }
-
-            if (condition === "SAI HÀNG" && !correctSkuValue) {
-                alert("Vui lòng nhập SKU đúng!");
-                correctSku.focus();
-                return;
-            }
-
-            const item = {
-                date: inboundDate.value,
-                warehouse: document.getElementById("warehouse").value,
-                shippingId: shippingId || "N/A",
-                mtb: mtb,
-                sku: sku,
-                skuName: "",
-                qty: qty,
-                note: condition,
-                pallet: "",
-                staff: staff || "N/A",
-                time: new Date().toLocaleTimeString("vi-VN"),
-                correctSku:
-                    condition === "SAI HÀNG" ? correctSkuValue : ""
-            };
-
-            queue.push(item);
-
-            document.getElementById("recentSkuBox").innerHTML = `
-                <div style="text-align:left;width:100%;padding:10px;">
-                    <p><b>MTB:</b> ${escapeHtml(item.mtb || "-")}</p>
-                    <p><b>SKU:</b> ${escapeHtml(item.sku)}</p>
-                    <p><b>QTY:</b> ${item.qty}</p>
-                    <p><b>Condition:</b> ${escapeHtml(item.note)}</p>
-                    <p><b>Staff/Shipping:</b>
-                        ${escapeHtml(item.staff)} /
-                        ${escapeHtml(item.shippingId)}
-                    </p>
-                </div>
-            `;
-
-            renderQueue();
-
-            inputMtb.value = "";
-            inputSku.value = "";
-            inputQty.value = 1;
-            correctSku.value = "";
-            inputMtb.focus();
-        }
-
-
-        // Hiển thị queue
-        function renderQueue() {
-            const tbody = document.getElementById("queueTableBody");
-            const count = document.getElementById("queueCount");
-
-            count.textContent = queue.length + " SKU";
-
-            if (queue.length === 0) {
-                tbody.innerHTML = `
+                <tbody id="queueTableBody">
                     <tr>
                         <td colspan="7"
                             style="text-align:center;color:#9ca3af;padding:30px;">
                             Chưa có SKU trong queue
                         </td>
                     </tr>
-                `;
-                return;
-            }
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-            tbody.innerHTML = queue.map(function(item, index) {
-                return `
-                    <tr>
-                        <td>${escapeHtml(item.mtb || "-")}</td>
-                        <td>${escapeHtml(item.sku)}</td>
-                        <td>${escapeHtml(item.note)}</td>
-                        <td>
-                            ${escapeHtml(item.warehouse)} /
-                            ${escapeHtml(item.staff)} /
-                            ${escapeHtml(item.shippingId)}
-                        </td>
-                        <td>${escapeHtml(item.correctSku || "-")}</td>
-                        <td>${item.qty}</td>
-                        <td style="text-align:center;">
-                            <button class="btn-delete"
-                                    onclick="removeItem(${index})">
-                                Xóa
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join("");
+</div>
+
+
+<!-- Không được xóa hai thẻ script này -->
+<script>
+    // URL Web App Apps Script mới
+    const SCRIPT_URL =
+        "https://script.google.com/macros/s/AKfycbz0tFaUKek27z-xs2zjF3ZTAJzv9HOiaGZsA8d4h33P9Uu3YEl-3C92x73ykh5M73le/exec";
+
+    let queue = [];
+
+    const inboundDate = document.getElementById("inboundDate");
+    const warehouse = document.getElementById("warehouse");
+    const staff = document.getElementById("staff");
+    const shippingId = document.getElementById("shippingId");
+    const inputMtb = document.getElementById("inputMtb");
+    const inputSku = document.getElementById("inputSku");
+    const inputQty = document.getElementById("inputQty");
+    const correctSku = document.getElementById("correctSku");
+    const correctSkuBox = document.getElementById("correctSkuBox");
+    const recentSkuBox = document.getElementById("recentSkuBox");
+    const queueTableBody = document.getElementById("queueTableBody");
+    const queueCount = document.getElementById("queueCount");
+    const btnSave = document.getElementById("btnSave");
+
+
+    // Gán ngày hiện tại
+    function setToday() {
+        const now = new Date();
+
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+
+        inboundDate.value = `${year}-${month}-${day}`;
+    }
+
+
+    // Hiển thị ô SKU đúng
+    document.querySelectorAll('input[name="condition"]')
+        .forEach(function(radio) {
+            radio.addEventListener("change", function() {
+                correctSkuBox.style.display =
+                    this.value === "SAI HÀNG" ? "block" : "none";
+            });
+        });
+
+
+    // Enter tại MTB
+    inputMtb.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            inputSku.focus();
+            inputSku.select();
+        }
+    });
+
+
+    // Enter tại SKU
+    inputSku.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            inputQty.focus();
+            inputQty.select();
+        }
+    });
+
+
+    // Enter tại số lượng
+    inputQty.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+
+            const condition = document.querySelector(
+                'input[name="condition"]:checked'
+            ).value;
+
+            if (condition === "SAI HÀNG") {
+                correctSku.focus();
+                correctSku.select();
+            } else {
+                addToQueue();
+            }
+        }
+    });
+
+
+    // Enter tại SKU đúng
+    correctSku.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            addToQueue();
+        }
+    });
+
+
+    // Nút thêm vào queue
+    document.getElementById("btnAdd")
+        .addEventListener("click", addToQueue);
+
+
+    // Thêm dữ liệu vào queue
+    function addToQueue() {
+        const mtbValue = inputMtb.value.trim();
+        const skuValue = inputSku.value.trim();
+        const qtyValue = parseInt(inputQty.value, 10) || 0;
+        const staffValue = staff.value.trim();
+        const shippingIdValue = shippingId.value.trim();
+
+        const conditionValue = document.querySelector(
+            'input[name="condition"]:checked'
+        ).value;
+
+        const correctSkuValue = correctSku.value.trim();
+
+        if (!skuValue) {
+            alert("Vui lòng nhập hoặc bắn SKU!");
+            inputSku.focus();
+            return;
         }
 
+        if (qtyValue <= 0) {
+            alert("Số lượng phải lớn hơn 0!");
+            inputQty.focus();
+            return;
+        }
 
-        // Xóa một dòng
-        window.removeItem = function(index) {
-            queue.splice(index, 1);
-            renderQueue();
+        if (conditionValue === "SAI HÀNG" && !correctSkuValue) {
+            alert("Vui lòng nhập SKU đúng!");
+            correctSku.focus();
+            return;
+        }
+
+        const item = {
+            date: inboundDate.value,
+            warehouse: warehouse.value,
+            shippingId: shippingIdValue || "N/A",
+            mtb: mtbValue,
+            sku: skuValue,
+
+            // Không sử dụng cột F khi Apps Script ghi dữ liệu
+            skuName: "",
+
+            qty: qtyValue,
+            note: conditionValue,
+            pallet: "",
+            staff: staffValue || "N/A",
+            time: new Date().toLocaleTimeString("vi-VN"),
+            correctSku: conditionValue === "SAI HÀNG"
+                ? correctSkuValue
+                : ""
         };
 
+        queue.push(item);
 
-        // Xóa toàn bộ queue
-        document.getElementById("btnClear")
-            .addEventListener("click", function() {
-                if (queue.length === 0) {
-                    return;
-                }
+        recentSkuBox.innerHTML = `
+            <div style="text-align:left;width:100%;padding:10px;">
+                <p>
+                    <b>MTB:</b>
+                    <span style="color:#fbbf24;">
+                        ${escapeHtml(item.mtb || "-")}
+                    </span>
+                </p>
 
-                if (confirm("Xóa tất cả dữ liệu tạm?")) {
-                    queue = [];
-                    renderQueue();
+                <p>
+                    <b>SKU:</b>
+                    <span style="color:#00f2fe;">
+                        ${escapeHtml(item.sku)}
+                    </span>
+                </p>
 
-                    document.getElementById("recentSkuBox").innerHTML =
-                        "Chưa có thông tin SKU";
+                <p><b>QTY:</b> ${item.qty}</p>
+                <p><b>Condition:</b> ${escapeHtml(item.note)}</p>
 
-                    inputMtb.focus();
-                }
-            });
+                <p>
+                    <b>Staff/Shipping:</b>
+                    ${escapeHtml(item.staff)}
+                    /
+                    ${escapeHtml(item.shippingId)}
+                </p>
+            </div>
+        `;
+
+        renderQueue();
+
+        inputMtb.value = "";
+        inputSku.value = "";
+        inputQty.value = 1;
+        correctSku.value = "";
+
+        inputMtb.focus();
+    }
 
 
-        // Lưu dữ liệu về Google Sheet
-        document.getElementById("btnSave")
-            .addEventListener("click", saveToSheet);
+    // Hiển thị queue
+    function renderQueue() {
+        queueCount.textContent = queue.length + " SKU";
 
-        async function saveToSheet() {
+        if (queue.length === 0) {
+            queueTableBody.innerHTML = `
+                <tr>
+                    <td colspan="7"
+                        style="text-align:center;color:#9ca3af;padding:30px;">
+                        Chưa có SKU trong queue
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        queueTableBody.innerHTML = queue.map(function(item, index) {
+            return `
+                <tr>
+                    <td>${escapeHtml(item.mtb || "-")}</td>
+                    <td>${escapeHtml(item.sku)}</td>
+                    <td>${escapeHtml(item.note)}</td>
+                    <td>
+                        ${escapeHtml(item.warehouse)}
+                        /
+                        ${escapeHtml(item.staff)}
+                        /
+                        ${escapeHtml(item.shippingId)}
+                    </td>
+                    <td>${escapeHtml(item.correctSku || "-")}</td>
+                    <td>${item.qty}</td>
+                    <td style="text-align:center;">
+                        <button class="btn-delete"
+                                onclick="removeItem(${index})">
+                            Xóa
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+    }
+
+
+    // Xóa một dòng
+    function removeItem(index) {
+        queue.splice(index, 1);
+        renderQueue();
+    }
+
+    window.removeItem = removeItem;
+
+
+    // Xóa toàn bộ queue
+    document.getElementById("btnClear")
+        .addEventListener("click", function() {
             if (queue.length === 0) {
-                alert("Queue đang trống!");
                 return;
             }
 
-            const btn = document.getElementById("btnSave");
-            const oldText = btn.textContent;
-            const dataToSave = JSON.parse(JSON.stringify(queue));
-
-            btn.disabled = true;
-            btn.textContent = "ĐANG LƯU...";
-
-            try {
-                await fetch(SCRIPT_URL, {
-                    method: "POST",
-                    mode: "no-cors",
-                    headers: {
-                        "Content-Type": "text/plain;charset=utf-8"
-                    },
-                    body: JSON.stringify({
-                        items: dataToSave
-                    })
-                });
-
-                alert("Đã gửi " + dataToSave.length +
-                      " SKU về Google Sheet.");
-
+            if (confirm("Xóa tất cả dữ liệu tạm?")) {
                 queue = [];
                 renderQueue();
 
-                document.getElementById("recentSkuBox").innerHTML =
-                    "Chưa có thông tin SKU";
-
+                recentSkuBox.innerHTML = "Chưa có thông tin SKU";
                 inputMtb.focus();
-
-            } catch (error) {
-                console.error("Lỗi lưu dữ liệu:", error);
-                alert("Không thể gửi dữ liệu về Google Sheet.");
-            } finally {
-                btn.disabled = false;
-                btn.textContent = oldText;
             }
+        });
+
+
+    // Tải lại inventory
+    document.getElementById("btnResetInventory")
+        .addEventListener("click", function() {
+            document.getElementById("inventoryBox").innerHTML =
+                "Scan SKU và nhấn ENTER để tra cứu";
+
+            document.getElementById("locCount").textContent =
+                "0 LOCATIONS";
+        });
+
+
+    // Lưu dữ liệu về Google Sheet
+    btnSave.addEventListener("click", saveToSheet);
+
+    async function saveToSheet() {
+        if (queue.length === 0) {
+            alert("Queue đang trống!");
+            return;
         }
 
+        const oldText = btnSave.textContent;
 
-        // Chống lỗi khi hiển thị dữ liệu lên HTML
-        function escapeHtml(value) {
-            return String(value)
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+        // Tạo bản sao để tránh queue bị thay đổi trong lúc gửi
+        const dataToSave = JSON.parse(JSON.stringify(queue));
+
+        btnSave.disabled = true;
+        btnSave.textContent = "ĐANG LƯU...";
+
+        try {
+            await fetch(SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: {
+                    "Content-Type": "text/plain;charset=utf-8"
+                },
+                body: JSON.stringify({
+                    items: dataToSave
+                })
+            });
+
+            alert(
+                "Đã gửi " + dataToSave.length +
+                " SKU về Google Sheet."
+            );
+
+            queue = [];
+            renderQueue();
+
+            recentSkuBox.innerHTML = "Chưa có thông tin SKU";
+            inputMtb.focus();
+
+        } catch (error) {
+            console.error("Lỗi lưu dữ liệu:", error);
+            alert("Không thể gửi dữ liệu về Google Sheet.");
+        } finally {
+            btnSave.disabled = false;
+            btnSave.textContent = oldText;
         }
+    }
 
 
-        renderQueue();
-    </script>
+    // Bảo vệ nội dung khi đưa vào HTML
+    function escapeHtml(value) {
+        return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+
+    setToday();
+    renderQueue();
+    inputMtb.focus();
+</script>
+
 </body>
 </html>
